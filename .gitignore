@@ -1,2 +1,4 @@
+*.idc
 *.ncb
 Debug/
+enc_temp_folder/
