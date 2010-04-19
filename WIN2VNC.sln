@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "omnithread", "omnithread\omnithread.vcproj", "{8F219E80-81C8-47B1-A422-19B1F0FB9642}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "win2vnc", "win2vnc.vcproj", "{ECEEB7B6-F467-4293-BC94-56D602CA8BFF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8F219E80-81C8-47B1-A422-19B1F0FB9642} = {8F219E80-81C8-47B1-A422-19B1F0FB9642}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Profile|Win32 = Profile|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F219E80-81C8-47B1-A422-19B1F0FB9642}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8F219E80-81C8-47B1-A422-19B1F0FB9642}.Debug|Win32.Build.0 = Debug|Win32
+		{8F219E80-81C8-47B1-A422-19B1F0FB9642}.Profile|Win32.ActiveCfg = Release|Win32
+		{8F219E80-81C8-47B1-A422-19B1F0FB9642}.Profile|Win32.Build.0 = Release|Win32
+		{8F219E80-81C8-47B1-A422-19B1F0FB9642}.Release|Win32.ActiveCfg = Release|Win32
+		{8F219E80-81C8-47B1-A422-19B1F0FB9642}.Release|Win32.Build.0 = Release|Win32
+		{ECEEB7B6-F467-4293-BC94-56D602CA8BFF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ECEEB7B6-F467-4293-BC94-56D602CA8BFF}.Debug|Win32.Build.0 = Debug|Win32
+		{ECEEB7B6-F467-4293-BC94-56D602CA8BFF}.Profile|Win32.ActiveCfg = Profile|Win32
+		{ECEEB7B6-F467-4293-BC94-56D602CA8BFF}.Profile|Win32.Build.0 = Profile|Win32
+		{ECEEB7B6-F467-4293-BC94-56D602CA8BFF}.Release|Win32.ActiveCfg = Release|Win32
+		{ECEEB7B6-F467-4293-BC94-56D602CA8BFF}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
