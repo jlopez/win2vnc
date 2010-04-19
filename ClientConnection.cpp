@@ -377,6 +377,9 @@ void ClientConnection::NegotiateProtocolVersion()
     log.Print(0, _T("RFB server supports protocol version %d.%d\n"),
 	    m_majorVersion,m_minorVersion);
 
+    if (m_majorVersion == 3 && m_minorVersion == 889)
+      m_opts.m_DisableClipboard = true;
+
     if ((m_majorVersion == 3) && (m_minorVersion < 3)) {
 		
         /* if server is 3.2 we can't use the new authentication */
