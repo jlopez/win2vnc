@@ -55,7 +55,7 @@ extern "C" {
 #define MAX_ENCODINGS 10
 #define VWR_WND_CLASS_NAME _T("win2vnc")
 
-static LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+// static LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
 
 #ifdef USE_SNOOPDLL
 #include "snoopdll.h"
@@ -594,7 +594,7 @@ void ClientConnection::SetFormatAndEncodings()
 	// Now we go through and put in all the other encodings in order.
 	// We do rather assume that the most recent encoding is the most
 	// desirable!
-	for (i = LASTENCODING; i >= rfbEncodingRaw; i--)
+	for (int i = LASTENCODING; i >= rfbEncodingRaw; i--)
 	{
 		if ( (m_opts.m_PreferredEncoding != i) &&
 			 (m_opts.m_UseEnc[i]))
