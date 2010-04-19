@@ -58,7 +58,7 @@ VNCOptions::VNCOptions()
   m_configSpecified = false;
   m_configFilename[0] = '\0';
   m_listening = false;
-  m_edge = M_EDGE_EAST;
+  m_edge = M_EDGE_WEST;
 }
 
 VNCOptions& VNCOptions::operator=(VNCOptions& s)
