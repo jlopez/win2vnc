@@ -180,8 +180,8 @@ void ClientConnection::Run()
 
 void ClientConnection::CreateDisplay() 
 {
-  m_screenwidth=GetSystemMetrics(SM_CXSCREEN);
-  m_screenheight=GetSystemMetrics(SM_CYSCREEN);
+  m_screenwidth=GetSystemMetrics(SM_CXVIRTUALSCREEN);
+  m_screenheight=GetSystemMetrics(SM_CYVIRTUALSCREEN);
   
   // Create the window
   WNDCLASS wndclass;
