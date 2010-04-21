@@ -41,6 +41,7 @@ VNCOptions::VNCOptions()
   m_Emul3Fuzz = 4;      // pixels away before emulation is cancelled
   m_Shared = false;
   m_DisableClipboard = false;
+  m_wheelMultiplier = 3;
 	
   m_host[0] = '\0';
   m_port = -1;
@@ -73,6 +74,7 @@ VNCOptions& VNCOptions::operator=(VNCOptions& s)
   m_Emul3Fuzz			= s.m_Emul3Fuzz;      // pixels away before emulation is cancelled
   m_Shared			= s.m_Shared;
   m_DisableClipboard  = s.m_DisableClipboard;
+  m_wheelMultiplier = s.m_wheelMultiplier;
 	
   strcpy(m_host, s.m_host);
   m_port				= s.m_port;
@@ -216,6 +218,16 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
 	continue;
       }
 			
+    } else if ( SwitchMatch(args[j], _T("wheelmultiplier") )) {
+      if (++j == i) {
+	ArgError(_T("No wheelmultiplier specified"));
+	continue;
+      }
+      if (_stscanf(args[j], _T("%d"), &m_wheelMultiplier) != 1) {
+	ArgError(_T("Invalid wheelmultiplier specified"));
+	continue;
+      }
+
     } else if ( SwitchMatch(args[j], _T("loglevel") )) {
       if (++j == i) {
 	ArgError(_T("No loglevel specified"));
@@ -301,6 +313,7 @@ void VNCOptions::Save(char *fname)
   saveInt("emulate3timeout",		m_Emul3Timeout,		fname);
   saveInt("emulate3fuzz",		m_Emul3Fuzz,		fname);
   saveInt("disableclipboard",		m_DisableClipboard, fname);
+  saveInt("wheelmultiplier",		m_wheelMultiplier, fname);
   saveInt("edge",			m_edge,		fname);
 }
 
@@ -319,6 +332,7 @@ void VNCOptions::Load(char *fname)
   m_Emul3Timeout =	readInt("emulate3timeout",m_Emul3Timeout, fname);
   m_Emul3Fuzz =		readInt("emulate3fuzz",	m_Emul3Fuzz,    fname);
   m_DisableClipboard =	readInt("disableclipboard", m_DisableClipboard, fname) != 0;
+  m_wheelMultiplier =	readInt("wheelmultiplier", m_wheelMultiplier, fname);
   m_edge =		readInt("edge",		m_edge,	fname);
 }
 
@@ -470,6 +484,11 @@ int CALLBACK VNCOptions::RealOptDlgProc( HWND hwnd,
       HWND hS = GetDlgItem(hwnd, IDC_EDGE_SOUTH);
       SendMessage(hW, BM_SETCHECK, m_edge == M_EDGE_SOUTH, 0);
 
+      char buffer[20];
+      _snprintf(buffer, sizeof(buffer), "%d", m_wheelMultiplier);
+      HWND hWM = GetDlgItem(hwnd, IDC_WHEEL_MULTIPLIER);
+      SetWindowText(hWM, buffer);
+
       CentreWindow(hwnd);
 			
       return TRUE;
@@ -526,6 +545,11 @@ int CALLBACK VNCOptions::RealOptDlgProc( HWND hwnd,
 	  HWND hW = GetDlgItem(hwnd, IDC_EDGE_WEST);
 	  if(SendMessage(hW, BM_GETCHECK, 0, 0) == BST_CHECKED)
 	    m_edge = M_EDGE_WEST;
+
+	  HWND hWM = GetDlgItem(hwnd, IDC_WHEEL_MULTIPLIER);
+	  char buffer[20];
+	  GetWindowText(hWM, buffer, 20);
+	  m_wheelMultiplier = atoi(buffer);
 
 	  EndDialog(hwnd, TRUE);
 				

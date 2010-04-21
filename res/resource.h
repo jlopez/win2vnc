@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by vncviewer.rc
 //
 #define IDR_TRAY                        101
@@ -51,6 +51,7 @@
 #define IDC_EDGE_WEST                   1035
 #define IDC_EDGE_NORTH                  1036
 #define IDC_EDGE_SOUTH                  1037
+#define IDC_WHEEL_MULTIPLIER            1039
 #define ID_SESSION_SET_CRECT            32777
 #define ID_SESSION_SWAPMOUSE            32785
 #define ID_CLOSEDAEMON                  40001
@@ -64,7 +65,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        154
 #define _APS_NEXT_COMMAND_VALUE         40010
-#define _APS_NEXT_CONTROL_VALUE         1039
+#define _APS_NEXT_CONTROL_VALUE         1040
 #define _APS_NEXT_SYMED_VALUE           154
 #endif
 #endif

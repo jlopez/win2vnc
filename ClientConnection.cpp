@@ -792,6 +792,60 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
 	}
 }
 
+int ClientConnection::OnMouseEvent(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
+#ifndef USE_SNOOPDLL
+  POINT pt;
+  if (GetFocus() != hwnd) return 0;
+  if (!m_running) return 0;
+
+  pt.x = GET_X_LPARAM(lParam);
+  pt.y = GET_Y_LPARAM(lParam);
+
+  ClientToScreen(hwnd, &pt);
+  int x=pt.x;
+  int y=pt.y;
+
+  if(x<0 || x>32768) x=0;
+  if(y<0 || y>32768) y=0;
+  if(x>=m_screenwidth) x=m_screenwidth-1;
+  if(y>=m_screenheight) y=m_screenheight-1;
+	  
+  if(m_onedge)
+  {
+	if(hwnd == m_edgewindow)
+	{
+	  log.Print(4,"Activated by action: %d\n",iMsg);
+	  Activate(x,y);
+	}
+	return 0;
+  }
+	  
+  if(hwnd == m_hwnd)
+  {
+	int back=0;
+	switch(m_opts.m_edge)
+	{
+	  case M_EDGE_WEST: back=x==m_screenwidth-1; break;
+	  case M_EDGE_EAST: back=x==0; break;
+	  case M_EDGE_NORTH: back=y==m_screenheight-1; break;
+	  case M_EDGE_SOUTH: back=y==0; break;
+	}
+	    
+	if(back)
+	{
+	  Deactivate(x,y);
+	  return 0;
+	}
+  }
+
+  ProcessPointerEvent(x,y, wParam, iMsg);
+#endif
+  return 0;
+}
+
+#define MK_WHEELUP 0x4000
+#define MK_WHEELDOWN 0x8000
+
 int ClientConnection::RealWndProc(HWND hwnd, UINT iMsg, 
 			      WPARAM wParam, LPARAM lParam)
 {
@@ -813,6 +867,14 @@ int ClientConnection::RealWndProc(HWND hwnd, UINT iMsg,
       return 0;
 
 
+    case 0x20A:
+    {
+      log.Print(0, "Wheel: %08X %08X\n", wParam, lParam);
+      int delta = ((short)HIWORD(wParam));
+      wParam |= delta < 0 ? MK_WHEELDOWN : MK_WHEELUP;
+      return OnMouseEvent(hwnd, iMsg, wParam, lParam);
+    }
+
     case WM_LBUTTONDOWN:
     case WM_LBUTTONUP:
     case WM_MBUTTONDOWN:
@@ -820,56 +882,7 @@ int ClientConnection::RealWndProc(HWND hwnd, UINT iMsg,
     case WM_RBUTTONDOWN:
     case WM_RBUTTONUP:
     case WM_MOUSEMOVE:
-    {
-#ifndef USE_SNOOPDLL
-      POINT pt;
-      if (GetFocus() != hwnd) return 0;
-      if (!m_running) return 0;
-
-      pt.x = GET_X_LPARAM(lParam);
-      pt.y = GET_Y_LPARAM(lParam);
-
-      ClientToScreen(hwnd, &pt);
-      int x=pt.x;
-      int y=pt.y;
-
-      if(x<0 || x>32768) x=0;
-      if(y<0 || y>32768) y=0;
-      if(x>=m_screenwidth) x=m_screenwidth-1;
-      if(y>=m_screenheight) y=m_screenheight-1;
-	  
-      if(m_onedge)
-      {
-	if(hwnd == m_edgewindow)
-	{
-	  log.Print(4,"Activated by action: %d\n",iMsg);
-	  Activate(x,y);
-	}
-	return 0;
-      }
-	  
-      if(hwnd == m_hwnd)
-      {
-	int back=0;
-	switch(m_opts.m_edge)
-	{
-	  case M_EDGE_WEST: back=x==m_screenwidth-1; break;
-	  case M_EDGE_EAST: back=x==0; break;
-	  case M_EDGE_NORTH: back=y==m_screenheight-1; break;
-	  case M_EDGE_SOUTH: back=y==0; break;
-	}
-	    
-	if(back)
-	{
-	  Deactivate(x,y);
-	  return 0;
-	}
-      }
-
-      ProcessPointerEvent(x,y, wParam, iMsg);
-#endif
-      return 0;
-    }
+      return OnMouseEvent(hwnd, iMsg, wParam, lParam);
 
 #ifdef USE_SNOOPDLL
     case SNOOPDLL_MOUSE_UPDATE:
@@ -1209,16 +1222,29 @@ ClientConnection::SubProcessPointerEvent(int x, int y, DWORD keyflags)
   if (m_opts.m_SwapMouse) {
     mask = ( ((keyflags & MK_LBUTTON) ? rfbButton1Mask : 0) |
 	     ((keyflags & MK_MBUTTON) ? rfbButton3Mask : 0) |
-	     ((keyflags & MK_RBUTTON) ? rfbButton2Mask : 0)  );
+	     ((keyflags & MK_RBUTTON) ? rfbButton2Mask : 0) |
+	     ((keyflags & MK_WHEELUP) ? rfbButtonWheelUpMask : 0) |
+	     ((keyflags & MK_WHEELDOWN) ? rfbButtonWheelDownMask : 0)  );
   } else {
     mask = ( ((keyflags & MK_LBUTTON) ? rfbButton1Mask : 0) |
 	     ((keyflags & MK_MBUTTON) ? rfbButton2Mask : 0) |
-	     ((keyflags & MK_RBUTTON) ? rfbButton3Mask : 0)  );
+	     ((keyflags & MK_RBUTTON) ? rfbButton3Mask : 0) |
+	     ((keyflags & MK_WHEELUP) ? rfbButtonWheelUpMask : 0) |
+	     ((keyflags & MK_WHEELDOWN) ? rfbButtonWheelDownMask : 0)  );
   }
-	
+
+  int count = 1;
+  if (keyflags & (MK_WHEELUP | MK_WHEELDOWN)) {
+    float delta = ((short)HIWORD(keyflags));
+    delta = delta < 0 ? -delta : delta;
+    count = max(delta * m_opts.m_wheelMultiplier / 120, 1);
+  }
+
   try {
-    SendPointerEvent((x), 
-		     (y), mask);
+    for (int i = 0; i < count; ++i) {
+      SendPointerEvent((x), 
+		       (y), mask);
+    }
   } catch (Exception &e) {
     e.Report();
     PostMessage(m_hwnd, WM_CLOSE, 0, 0);

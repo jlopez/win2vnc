@@ -1,5 +1,6 @@
 *.idc
 *.ncb
+*.aps
 Debug/
 Release/
 enc_temp_folder/

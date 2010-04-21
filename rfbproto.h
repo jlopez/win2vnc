@@ -678,6 +678,8 @@ typedef struct {
 #define rfbButton1Mask 1
 #define rfbButton2Mask 2
 #define rfbButton3Mask 4
+#define rfbButtonWheelUpMask 8
+#define rfbButtonWheelDownMask 16
 
 #define sz_rfbPointerEventMsg 6
 

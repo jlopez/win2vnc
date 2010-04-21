@@ -81,6 +81,7 @@ public:
 	void Deactivate(int,int);
 
 	int RealWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+	int OnMouseEvent(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
 
 	void Init(VNCviewerApp *pApp);
 	void Exit();

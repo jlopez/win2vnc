@@ -57,6 +57,7 @@ class VNCOptions
   int   m_Emul3Fuzz;
   bool	m_Shared;
   bool	m_DisableClipboard;
+  int   m_wheelMultiplier;
   
 #define M_EDGE_NORTH 0
 #define M_EDGE_SOUTH 1
