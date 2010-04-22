@@ -1,0 +1,19 @@
+Win2VNC'
+--------
+Win2VNC is a great tool by Fredrik Hübinette to use another computer's
+monitor as a secondary monitor. It works by using VNC to control the
+secondary monitor.
+
+http://fredrik.hubbe.net/win2vnc.html
+
+This patch aims to improve a few limitations of the original.
+
+Implemented
+-----------
+- Support multimonitor client
+- Disable clipboard sharing when working with an OS X host
+  For some reason, the communication breaks down when clipboard is sent
+  to the sharing host.
+- Support mouse wheel
+- Support meta key (mapped to Windows key)
+  This will allow OS X hosts to receive 'Option' keystrokes.
