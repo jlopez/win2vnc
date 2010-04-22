@@ -50,6 +50,8 @@ static const vncKeymapping keymap[] = {
     {VK_LMENU,		XK_Alt_L},
     {VK_RMENU,		XK_Alt_R},
     {VK_MENU,		XK_Alt_L},
+    {VK_LWIN,		XK_Meta_L},
+    {VK_RWIN,		XK_Meta_R},
     {VK_PAUSE,		XK_Pause},
     {VK_CAPITAL,	XK_Caps_Lock},
     {VK_ESCAPE,		XK_Escape},
