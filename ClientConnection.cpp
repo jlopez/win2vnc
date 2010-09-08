@@ -107,6 +107,8 @@ ClientConnection::ClientConnection(VNCviewerApp *pApp, LPTSTR host, int port)
 
 void ClientConnection::Init(VNCviewerApp *pApp)
 {
+  m_hKbdHook = 0;
+
   m_onedge = 1;
   m_hwnd = 0;
   m_edgewindow =0;
@@ -178,6 +180,7 @@ void ClientConnection::Run()
 }
 
 
+ClientConnection *g_clientConnectionInstance = 0;
 void ClientConnection::CreateDisplay() 
 {
   m_screenwidth=GetSystemMetrics(SM_CXVIRTUALSCREEN);
@@ -281,6 +284,51 @@ void ClientConnection::CreateDisplay()
 
 
   m_menu = new vncMenu(m_pApp, this);
+
+  // Setup low level keyboard hook to capture alt-tab, alt-esc, ctrl-esc, win & menu keys
+  RemoveKbdHook();
+  m_hKbdHook = SetWindowsHookEx(13, ClientConnection::KbdHook, m_pApp->m_instance, 0);
+  g_clientConnectionInstance = this; // Nasty... :(
+}
+
+typedef struct tagKBDLLHOOKSTRUCT {
+  DWORD     vkCode;
+  DWORD     scanCode;
+  DWORD     flags;
+  DWORD     time;
+  ULONG_PTR dwExtraInfo;
+} KBDLLHOOKSTRUCT, *PKBDLLHOOKSTRUCT, *LPKBDLLHOOKSTRUCT;
+
+LRESULT CALLBACK ClientConnection::KbdHook(int nCode, WPARAM wParam, LPARAM lParam) {
+  if (g_clientConnectionInstance)
+    return g_clientConnectionInstance->RealKbdHook(nCode, wParam, lParam);
+  return 0;
+}
+
+LRESULT ClientConnection::RealKbdHook(int nCode, WPARAM wParam, LPARAM lParam) {
+  if (!m_onedge && nCode == HC_ACTION) {
+    KBDLLHOOKSTRUCT *pkbhs = (KBDLLHOOKSTRUCT *)lParam;
+    BOOL bControlKeyDown = GetAsyncKeyState(VK_CONTROL) >> 15;
+    BOOL bAltKeyDown = pkbhs->flags && (KF_ALTDOWN >> 8);
+    log.Print(3, _T("LLKBD: %08X %08X %08X %08X %p\n"), pkbhs->vkCode,
+      pkbhs->scanCode, pkbhs->flags, pkbhs->time, pkbhs->dwExtraInfo);
+
+    DWORD vkCode = pkbhs->vkCode;
+    if (vkCode == VK_TAB && bAltKeyDown ||
+        vkCode == VK_ESCAPE && bAltKeyDown ||
+	vkCode == VK_ESCAPE && bControlKeyDown ||
+	vkCode == VK_LWIN || vkCode == VK_RWIN || vkCode == VK_MENU) {
+      ProcessKeyEvent(vkCode, ((pkbhs->scanCode & 0xFF) << 16) | ((pkbhs->flags & 0xFF) << 24));
+      return 1;
+    }
+  }
+  return CallNextHookEx(m_hKbdHook, nCode, wParam, lParam);
+}
+
+void ClientConnection::RemoveKbdHook() {
+  if (m_hKbdHook)
+    UnhookWindowsHookEx(m_hKbdHook);
+  m_hKbdHook = 0;
 }
 
 void ClientConnection::GetConnectDetails()
@@ -641,7 +689,9 @@ void ClientConnection::Exit()
     DestroyWindow(m_edgewindow);
     m_edgewindow=0;
   }
-  
+
+  RemoveKbdHook();
+
   if (m_sock != INVALID_SOCKET) {
     shutdown(m_sock, SD_BOTH);
     closesocket(m_sock);
@@ -971,6 +1021,7 @@ int ClientConnection::RealWndProc(HWND hwnd, UINT iMsg,
 	delete m_menu;
 	m_menu=0;
       }
+      RemoveKbdHook();
       KillThread();
       DestroyWindow(hwnd);
       return 0;

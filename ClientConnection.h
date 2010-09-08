@@ -59,6 +59,11 @@ public:
 
 	HWND m_edgewindow;
 
+	HHOOK m_hKbdHook;
+	static LRESULT CALLBACK KbdHook(int nCode, WPARAM wParam, LPARAM lParam);
+	LRESULT RealKbdHook(int nCode, WPARAM wParam, LPARAM lParam);
+	void RemoveKbdHook();
+
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
 	void DoBlit();
 	VNCviewerApp *m_pApp;
